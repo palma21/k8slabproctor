@@ -1,4 +1,4 @@
-# Kubernetes Workshop - Step by Step Proctor Guide
+# Kubernetes Workshop - Step by Step Guide
 
 ## 1 - Run a Docker container
 
