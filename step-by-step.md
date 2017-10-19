@@ -157,7 +157,7 @@ kubectl proxy
 
 ## 4 - Deploying on Kubernetes
 
-Now that we have our cluster up and running, it's time to start deploying a workload on there.  As a sidenote, for easy Kubernetes yaml manifest generation, one might want to install a yoman generator like `npm install -g generator-kubegen`.
+Now that we have our cluster up and running, it's time to start deploying a workload on there.  As a sidenote, for easy Kubernetes yaml manifest generation, one might want to install a yoman generator like `npm install -g generator-kubegen`or Kubernetes support for VS Code from: https://marketplace.visualstudio.com/items?itemName=ipedrazas.kubernetes-snippets.
 
 ### Deploying a single Pod
 
@@ -184,10 +184,140 @@ kubectl get pods
 kubectl describe pod myredis-pod
 ~~~
 
+At this point, we just have it running but there's no port exposed for us to connect to.  We don't want to publish this port wide open to the public though: it should just be accesible to our web site.  We'll do that next during out deployment.
+
+For now, if you like to test that the Redis pod works, use the `kubectl port-forward` feature, like this:
+
+~~~
+kubectl port-forward myredis-pod 6379:6379
+~~~
+
+Then try some Redis commands locally from your machine.
+
 ### Deploying multiple pods using a Deployment
+
+Use the following container images when creating the Kubernetes deployment:
+- Redis: redis
+- Frontend: microsoft/azure-vote-front:redis-v1
+
+Use the environment variable "REDIS" and as its value the hostname for the Redis container to indicate how the frontend can communicate with Redis.
 
 The yaml for the deployment could look like this:
 
+- Backend:
 ~~~yaml
-
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name:  voting-app-backend
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app:  voting-app
+        tier: voting-app-backend
+    spec:
+      containers:
+      - image:  redis
+        name: voting-app-redis
+        env:
+        - name:  ENVVARNAME
+          value:  ENVVARVALUE       
+        ports:
+        - containerPort:  6379
+          name:  redis-port
 ~~~
+- Backend Service:
+~~~yaml
+kind: Service
+apiVersion: v1
+metadata:
+  name:  voting-app-backend-svc
+spec:
+  selector:
+    app: voting-app
+    tier:  voting-app-backend
+  type:  ClusterIP
+  ports:
+  - name:  redis-port
+    port:  6379
+    targetPort:  6379
+~~~
+~~~
+kubectl create -f ./votingapp-backend.yaml
+kubectl create -f ./votingapp-backend-svc.yaml
+kubectl get pods
+kubectl get svc
+~~~
+
+- Frontend:
+~~~yaml
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name:  voting-app-frontend
+spec:
+  replicas: 3
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app:  voting-app
+        tier: voting-app-frontend
+    spec:
+      containers:
+      - image:  microsoft/azure-vote-front:redis-v1
+        name: voting-app-frontend
+        env:
+        - name:  REDIS
+          value: "voting-app-backend-svc"       
+        ports:
+        - containerPort:  80
+          name:  frontend-port
+~~~
+
+- Frontend Service
+~~~yaml
+kind: Service
+apiVersion: v1
+metadata:
+  name:  voting-app-frontend-svc
+spec:
+  selector:
+    app:  voting-app
+    tier: voting-app-frontend
+  type:  LoadBalancer
+  ports:
+  - name:  http
+    port:  80
+    targetPort:  80
+~~~
+
+kubectl create -f ./votingapp-frontend.yaml
+kubectl create -f ./votingapp-frontend-svc.yaml
+kubectl get pods
+kubectl get svc
+
+// go into a pod and check environment vars for REDIS:
+kubectl exec -p voting-app-frontend-4212741653-4z8wm -ti /bin/bash
+printenv
+
+// try out the web app:
+kubectl port-forward voting-app-frontend-4212741653-0t6n2 8080:80
+~~~
+
+  > Side note: 
+  > For troubleshooting dns resolution, you might need `nslookup`
+  > To install this into a pod:
+  > `apt-get update`
+  > `apt-get install dnsutils -y`

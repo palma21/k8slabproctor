@@ -1,0 +1,26 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name:  voting-app-frontend
+spec:
+  replicas: 3
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app:  voting-app
+        tier: voting-app-frontend
+    spec:
+      containers:
+      - image:  microsoft/azure-vote-front:redis-v1
+        name: voting-app-frontend
+        env:
+        - name:  REDIS
+          value: "voting-app-backend-svc"       
+        ports:
+        - containerPort:  80
+          name:  frontend-port

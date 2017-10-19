@@ -1,0 +1,13 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name:  voting-app-backend-svc
+spec:
+  selector:
+    app: voting-app
+    tier:  voting-app-backend
+  type:  ClusterIP
+  ports:
+  - name:  redis-port
+    port:  6379
+    targetPort:  6379
