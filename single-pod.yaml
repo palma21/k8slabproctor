@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: azure-vote
+  name: myredis-pod
+spec:
+  containers:
+    - name: myredis-container
+      image: redis
