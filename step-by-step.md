@@ -303,6 +303,7 @@ spec:
     targetPort:  80
 ~~~
 
+~~~
 kubectl create -f ./votingapp-frontend.yaml
 kubectl create -f ./votingapp-frontend-svc.yaml
 kubectl get pods
@@ -321,3 +322,5 @@ kubectl port-forward voting-app-frontend-4212741653-0t6n2 8080:80
   > To install this into a pod:
   > `apt-get update`
   > `apt-get install dnsutils -y`
+
+You may want to stream the logs of the frontend while you're testing the application, like this: `kubectl logs deployment/voting-app-frontend -f`
