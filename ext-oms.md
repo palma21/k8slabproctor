@@ -25,9 +25,12 @@ Using helm, getting the OMS agents installed is as simple as:
 ~~~
 helm install --name omsagent stable/msoms
 helm upgrade omsagent \
---set omsagent.secret.wsid=6bb9a650-1f31-4121-b585-da4caed0187e \
---set omsagent.secret.key=bzhZoygXCe8vcj9aQYOZZ2wFn9QlMrAYJXWTbfhqlL2jygKkHJ6aQRjeiA9jOnZcWaNGt0xevV1KEtgfzS32ag== \
+--set omsagent.secret.wsid=[YOUR-WSID-GOES-HERE] \
+--set omsagent.secret.key=[YOUR-SECRET-KEY-GOES-HERE] \
 stable/msoms
 ~~~
 
 ## Monitoring the application
+
+Add the Container Monitoring Solution to your workspace and give it some time to start collecting the information which is being sent by the agents.
+
