@@ -1,0 +1,2 @@
+NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+      You can watch the status of by running 'kubectl get svc -w {{ .Release.Name }}-azurevote-front-svc'

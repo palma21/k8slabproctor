@@ -1,0 +1,12 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name:  {{ .Release.Name }}-azurevote-back-svc
+spec:
+  selector:
+    app:  {{ .Release.Name }}-azure-vote-back
+  type: ClusterIP
+  ports:
+  - name:  redis
+    port:  6379
+    targetPort:  redis

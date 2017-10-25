@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-azurevote-front
+spec:
+  replicas: {{ .Values.frontendReplicaCount }}
+  template:
+    metadata:
+      labels:
+        editor: vscode
+        app: {{ .Release.Name }}-azure-vote-front
+    spec:
+      containers:
+      - name: azure-vote
+        image: xstof/azure-vote
+        env:
+        - name:  REDIS
+          value:  {{ .Release.Name }}-azurevote-back-svc      
+        ports:
+        - containerPort:  80
+          name:  http
