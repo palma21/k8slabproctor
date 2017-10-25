@@ -153,3 +153,9 @@ helm ls            # list the installed releases; should list "myvote"
 kubectl get pods   # list the pods that our release installed
 kubectl get svc    # make note of the public ip and try browsing it
 ~~~
+
+Delete the release:
+
+~~~sh
+helm delete --purge myvotingapp
+~~~
