@@ -131,8 +131,12 @@ az group create -n gbbk8s -l northeurope
 
 - spin up your Kubernetes cluster:
 
-~~~
+~~~sh
+# using ACS:
 az acs create --name gbbk8scluster -g gbbk8s --orchestrator-type kubernetes --generate-ssh-keys
+
+# using AKS:
+# az aks create -n ccaks -g ccaks -l westus2 -k 1.8.1 --generate-ssh-keys
 ~~~
 
 - install the Kubernetes `kubectl` command line interface:
