@@ -329,29 +329,32 @@ kubectl port-forward voting-app-frontend-4212741653-0t6n2 8080:80
 
 You may want to stream the logs of the frontend while you're testing the application, like this: `kubectl logs deployment/voting-app-frontend -f`
 
-Additional notes:
+# Troubleshooting Guide
+
+## Working with the Kubernetes Dashboard:
+- Run the following command: `kubectl proxy` 
+- Open the ip given `127.0.0.1:8001/ui`
+- Append to the redirected URL that opens, a forward slash: `/`
+
+> If Kubernestes Dashboard does not open, break the kubect proxy connection and reestablish it and try again with / and the end of the URL
  
-#How to get kubernetes dashboard up and running use:
-Run the following command:
-kubectl proxy 
-Open the ip given 127.0.0.1:8001/ui
-The redirected URL that opens, add the following to the end of the URL: /
-If Kubernestes Dashboard does not open, break the kubect proxy connection and reestablish it and try again with / and the end of the URL
- 
-#USE THIS WHEN YOU ARE USING AZURE FREE [update git]: 
+## Working with the Azure Free Tier: 
+
+Have people register the right Azure Resource Providers in the Azure portal:
+- `Microsoft.Compute`
+- `Microsoft.ContainerService`
+- `Microsoft.Storage`
+- `Microsoft.Network`
+
+~~~sh
 az acs create --orchestrator-type kubernetes --resource-group workshopno --name myK8SCluster --agent-count 1 --generate-ssh-keys --verbose
+~~~
+
+> The free account does _not_ work in West UK
+
+## Sharing your C Drive:
+Please see: https://blogs.msdn.microsoft.com/stevelasker/2016/06/14/configuring-docker-for-windows-volumes/
  
-#Use this for if you cannot share your c drive:
-https://blogs.msdn.microsoft.com/stevelasker/2016/06/14/configuring-docker-for-windows-volumes/
+## Dealing with Anti-Virus
  
-#Free version users: 
-Remember to register following resources under Azure/Subscription/ in the azure portal (in order to deploy containers services):
-Microsoft.compute
-Microsoft.ContainerService
-Microsoft.Storage
-Microsoft.network
- 
-Free account does NOT work in West UK
- 
-Symantec AV protection can block kubectl get-credential command while running inside Linux sub system for Windows. Sudo apt-get update also fails. 
- 
+Symantec AV protection can block `az acs get-credentials` command while running inside Linux sub system for Windows. `Sudo apt-get update` also fails. 
