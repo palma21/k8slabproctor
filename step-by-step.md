@@ -328,3 +328,30 @@ kubectl port-forward voting-app-frontend-4212741653-0t6n2 8080:80
   > `apt-get install dnsutils -y`
 
 You may want to stream the logs of the frontend while you're testing the application, like this: `kubectl logs deployment/voting-app-frontend -f`
+
+Additional notes:
+ 
+#How to get kubernetes dashboard up and running use:
+Run the following command:
+kubectl proxy 
+Open the ip given 127.0.0.1:8001/ui
+The redirected URL that opens, add the following to the end of the URL: /
+If Kubernestes Dashboard does not open, break the kubect proxy connection and reestablish it and try again with / and the end of the URL
+ 
+#USE THIS WHEN YOU ARE USING AZURE FREE [update git]: 
+az acs create --orchestrator-type kubernetes --resource-group workshopno --name myK8SCluster --agent-count 1 --generate-ssh-keys --verbose
+ 
+#Use this for if you cannot share your c drive:
+https://blogs.msdn.microsoft.com/stevelasker/2016/06/14/configuring-docker-for-windows-volumes/
+ 
+#Free version users: 
+Remember to register following resources under Azure/Subscription/ in the azure portal (in order to deploy containers services):
+Microsoft.compute
+Microsoft.ContainerService
+Microsoft.Storage
+Microsoft.network
+ 
+Free account does NOT work in West UK
+ 
+Symantec AV protection can block kubectl get-credential command while running inside Linux sub system for Windows. Sudo apt-get update also fails. 
+ 
