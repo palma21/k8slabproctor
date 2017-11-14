@@ -10,7 +10,6 @@ docker image ls                # container image listed
 
 ## Run a container
 
-
 ### Simple base image
 
 ~~~sh
@@ -65,7 +64,7 @@ docker logs mywebserver        # two log entries
 docker stop mywebserver        # stop the nginx container
 ~~~
 
-## Map a folder
+### Mapping the file system
 
 ~~~sh
 mkdir tmp                      
@@ -80,3 +79,35 @@ curl localhost:8080/hello.html     # content is served by nginx
 docker stop nginx                  # stop the nginx container
 ~~~
 
+## Building a container
+
+Instead of mapping files from the host into a container, a more sustainable solution that allows a container to capture all its dependencies is to simply build your own.  This is easier than one might expect.
+
+> Execute below steps in an empty folder.
+
+### Create content to copy into container
+
+~~~sh
+# prepare content for nginx
+echo "hello world" > hello.html
+~~~
+
+### Create a Dockerfile
+
+Create a file called `Dockerfile` with the contents below:
+
+~~~dockerfile
+FROM nginx
+COPY ./hello.html /usr/share/nginx/html
+~~~
+
+### Build the container
+
+~~~sh
+# replace "xstof" with your own docker hub repository name
+docker build -t xstof/hello .
+# show the image
+docker image ls
+# push the image to docker hub
+docker push xstof/hello
+~~~
