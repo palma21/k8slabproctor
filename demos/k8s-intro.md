@@ -190,3 +190,92 @@ kubectl get svc        # show how public ip is being provisioned
 curl [public-ip-of-myservice]
 ~~~
 
+## Persistent Storage
+
+There is different ways in Azure to have containers persist data: Azure Disks or Azure Files.  We'll have a look at Azure files here.
+
+In order to set up Azure Files with your cluster:
+- make sure you have a pre-provisioned Azure Storage account in the same resource group and location as your cluster.  The Kubernetes auto-provisioning will later try to find this account automatically.
+- create a `storageClass` for it first, in a file `azurefiles-storageclass.yaml`:
+
+~~~yaml
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: azurefile
+provisioner: kubernetes.io/azure-file
+parameters:
+  skuName: Standard_LRS
+~~~
+
+~~~sh
+kubectl create -f azurefiles-storageclass.yaml
+~~~
+
+Now that we have a storageClass, indicating that we have storage available of the kind "Azure Files", we need to "claim" dynamically chunks of this storage.  To do so, we're creating a so-called `Persistent Volume Claim`, reffering to our storage kind called `azurefile` in a file `mypvc.yaml`:
+
+~~~yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: mypvc
+    labels:
+        app: app-label
+        tier: tier-label
+spec:
+    storageClassName: azurefile # standard or default
+    accessModes:
+        - ReadWriteMany
+    resources:
+        requests:
+            # The amount of the volume's storage to request
+            storage: 5Gi
+~~~
+
+~~~yaml
+kubectl create -f mypvc.yaml
+kubectl get pvc -o wide      # the pvc should show up as being "Bound" 
+~~~
+
+Now that we have a claimed piece of storage, we can start using it within our pods.  Let's once more have nginx serve up some content; this time served from within Azure Files.
+Adapt the previous deployment to something like the below:
+
+~~~yaml
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+    name: mywebserverdeployment
+    namespace: default
+spec:
+    replicas: 3
+    selector:
+        matchLabels:
+          app: myapp
+    template:
+        metadata:
+            labels:
+                app: myapp
+                tier: data
+        spec:
+            volumes:
+            - name: myvol
+              persistentVolumeClaim:
+                claimName: mypvc
+            containers:
+            - name: nginx
+              image: nginx
+              imagePullPolicy: Always
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 200Mi
+              ports:
+              - containerPort: 80
+              volumeMounts:
+              - mountPath: /usr/share/nginx/html
+                name: myvol
+~~~
+
+Redeploy the deployment.
+
+> TODO - NGINX SEEMS TO RETURN A 403 FORBIDDEN - NEED TO FIND OUT WHY
