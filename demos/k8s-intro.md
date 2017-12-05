@@ -195,6 +195,7 @@ curl [public-ip-of-myservice]
 There is different ways in Azure to have containers persist data: Azure Disks or Azure Files.  We'll have a look at Azure files here.
 
 In order to set up Azure Files with your cluster:
+
 - make sure you have a pre-provisioned Azure Storage account in the same resource group and location as your cluster.  The Kubernetes auto-provisioning will later try to find this account automatically.
 - create a `storageClass` for it first, in a file `azurefiles-storageclass.yaml`:
 
@@ -204,6 +205,11 @@ apiVersion: storage.k8s.io/v1
 metadata:
   name: azurefile
 provisioner: kubernetes.io/azure-file
+mountOptions:
+  - dir_mode=0777
+  - file_mode=0777
+  - uid=1000
+  - gid=1000
 parameters:
   skuName: Standard_LRS
 ~~~
@@ -234,7 +240,7 @@ spec:
 
 ~~~yaml
 kubectl create -f mypvc.yaml
-kubectl get pvc -o wide      # the pvc should show up as being "Bound" 
+kubectl get pvc -o wide      # the pvc should show up as being "Bound"
 ~~~
 
 Now that we have a claimed piece of storage, we can start using it within our pods.  Let's once more have nginx serve up some content; this time served from within Azure Files.
@@ -278,4 +284,4 @@ spec:
 
 Redeploy the deployment.
 
-> TODO - NGINX SEEMS TO RETURN A 403 FORBIDDEN - NEED TO FIND OUT WHY
+> NGINX RETURNS A 403 FORBIDDEN - The reason is the permissions the folder is mounted with. The fix is in place but will only work with version 1.9.0+ of k8s.
